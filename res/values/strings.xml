@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">EmailDemo</string>
+    <string name="feedback_button">Feedback!</string>
+    <string name="intent_broadcast">Broadcast</string>
+    <string name="intent_broadcast_enhanced">Broadcast Enhanced</string>
+    <string name="mail_api">Java Api</string>
+
+</resources>
