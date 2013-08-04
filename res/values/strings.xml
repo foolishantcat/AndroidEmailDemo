@@ -6,5 +6,8 @@
     <string name="intent_broadcast">Broadcast</string>
     <string name="intent_broadcast_enhanced">Broadcast Enhanced</string>
     <string name="mail_api">Java Api</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="send_mail_with_java">Send Mail with JavaMaiApi</string>
 
 </resources>

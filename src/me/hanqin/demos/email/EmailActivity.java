@@ -5,13 +5,15 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.view.MotionEvent;
 import android.view.View;
 
-import me.hanqin.demos.email.util.MailUtility;
 import me.hanqin.demos.email.util.SystemUiHider;
 
-public class EmailActivity extends Activity {
+import static android.view.View.OnClickListener;
+
+public class EmailActivity extends FragmentActivity {
     private static final boolean AUTO_HIDE = true;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final boolean TOGGLE_ON_CLICK = false;
@@ -23,22 +25,22 @@ public class EmailActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_screen);
 
-        findViewById(R.id.intent_broadcast).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.intent_broadcast).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 MailUtility.sendMail(EmailActivity.this, "Hello Android", "Hello Email");
             }
         });
-        findViewById(R.id.intent_broadcast_enhanced).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.intent_broadcast_enhanced).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 MailUtility.sendMailEnhanced(EmailActivity.this, "Hello Android", "Hello Email");
             }
         });
-        findViewById(R.id.java_mail_api).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.java_mail_api).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                MailUtility.sendMailWithJavaApi(EmailActivity.this, "Hello Android", "Hello Email");
+                new MailClientConfigDialog().show(getSupportFragmentManager(), MailClientConfigDialog.class.toString());
             }
         });
         initSystemUiHider();
@@ -52,7 +54,7 @@ public class EmailActivity extends Activity {
         mSystemUiHider.setup();
         mSystemUiHider.setOnVisibilityChangeListener(new SystemUiVisibilityChangeListener(controlsView));
 
-        contentView.setOnClickListener(new View.OnClickListener() {
+        contentView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (TOGGLE_ON_CLICK) {

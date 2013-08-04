@@ -1,14 +1,17 @@
-package me.hanqin.demos.email.util;
+package me.hanqin.demos.email;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.widget.Toast;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import me.hanqin.demos.email.EmailActivity;
+
+import net.jondev.Mail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +61,47 @@ public class MailUtility {
         activity.startActivity(chooserIntent);
     }
 
+    public static void sendMailWithJavaApi(Activity activity, String username, String password, CharSequence subject, CharSequence text) {
+        Mail mail = new Mail(username, password);
+
+        mail.setTo(new String[]{TO_ME});
+        mail.setFrom(username);
+        mail.setSubject(subject.toString());
+        mail.setBody(text.toString());
+
+        new SendingMailTask(activity, mail).execute();
+    }
+
+    private static class SendingMailTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final Activity activity;
+        private final Mail mail;
+
+        public SendingMailTask(Activity activity, Mail mail) {
+            this.activity = activity;
+            this.mail = mail;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                return this.mail.send();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean sent) {
+            if (sent) {
+                Toast.makeText(activity, "Email was sent successfully.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(activity, "Email was not sent.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private static Intent mailToIntent(CharSequence subject, CharSequence text) {
         Intent intent = new Intent(Intent.ACTION_SEND, Uri.fromParts("mailto", TO_ME, null));
         intent.setType("message/rfc822");
@@ -65,10 +109,6 @@ public class MailUtility {
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT, text);
         return intent;
-    }
-
-    public static void sendMailWithJavaApi(Activity activity, CharSequence subject, CharSequence text) {
-        Toast.makeText(activity, "Working in progress", Toast.LENGTH_LONG).show();
     }
 
     private static class ImplementsYourFilterHere implements Predicate<ResolveInfo> {
