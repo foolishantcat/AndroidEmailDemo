@@ -24,33 +24,32 @@ public class MailUtility {
     public static final String TO_ME = "hanhaify@gmail.com";
 
     public static void sendMail(Activity activity, CharSequence subject, CharSequence text) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("message/rfc822");
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{TO_ME});
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT, text);
+        Intent intent = mailToIntent(subject, text);
 
         activity.startActivity(Intent.createChooser(intent, "Send mail..."));
     }
 
     public static void sendMailEnhanced(Activity activity, CharSequence subject, CharSequence text) {
-        Intent mailtoIntent = new Intent(Intent.ACTION_SEND, Uri.fromParts("mailto", TO_ME, null));
-        mailtoIntent.setType("message/rfc822");
-        mailtoIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{TO_ME});
-        mailtoIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        mailtoIntent.putExtra(Intent.EXTRA_TEXT, text);
+        Intent intent = mailToIntent(subject, text);
 
-        List<ResolveInfo> resolveInfos = activity.getPackageManager().queryIntentActivities(mailtoIntent, 0);
+        //Find all apps that supports a mail with "message/rfc822" support
+        List<ResolveInfo> resolveInfos = activity.getPackageManager().queryIntentActivities(intent, 0);
 
+        //Your filter logic
         Iterable<ResolveInfo> filtered = filter(resolveInfos, new ImplementsYourFilterHere());
+
+        //How you would like to arrange the apps
         ArrayList<ResolveInfo> list = newArrayList(filtered);
         Collections.sort(list, new YourSortLogic());
 
-        Iterable<Intent> intents = transform(list, new BuildYourOwnIntent(mailtoIntent));
+        //More customization before displaying chooser dialog
+        //Like in this post:
+        //http://stackoverflow.com/a/12804063
+        Iterable<Intent> intents = transform(list, new BuildYourOwnIntent(intent));
         List<Intent> intentsToBroadcast = newArrayList(intents);
 
         if (intentsToBroadcast.isEmpty()) {
-            activity.startActivity(Intent.createChooser(mailtoIntent, "Send mail..."));
+            activity.startActivity(Intent.createChooser(intent, "Send mail..."));
             return;
         }
 
@@ -59,8 +58,17 @@ public class MailUtility {
         activity.startActivity(chooserIntent);
     }
 
+    private static Intent mailToIntent(CharSequence subject, CharSequence text) {
+        Intent intent = new Intent(Intent.ACTION_SEND, Uri.fromParts("mailto", TO_ME, null));
+        intent.setType("message/rfc822");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{TO_ME});
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        return intent;
+    }
+
     public static void sendMailWithJavaApi(Activity activity, CharSequence subject, CharSequence text) {
-        Toast.makeText(activity, "Working in progress", 300).show();
+        Toast.makeText(activity, "Working in progress", Toast.LENGTH_LONG).show();
     }
 
     private static class ImplementsYourFilterHere implements Predicate<ResolveInfo> {
@@ -86,7 +94,7 @@ public class MailUtility {
 
         @Override
         public Intent apply(ResolveInfo resolveInfo) {
-            Intent result = (Intent) mailtoIntent.clone();
+            Intent result = new Intent(mailtoIntent);
             result.setPackage(resolveInfo.activityInfo.packageName);
             result.setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
             return result;
